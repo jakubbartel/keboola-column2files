@@ -1,6 +1,6 @@
 <?php
 
-namespace Keboola\ColumnToFilesProcessor;
+namespace Keboola\SplitByValueProcessor;
 
 use Keboola\Component\Config\BaseConfigDefinition;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
@@ -19,9 +19,8 @@ class ConfigDefinition extends BaseConfigDefinition
         $parametersNode
             ->isRequired()
             ->children()
-                ->scalarNode('column')
+                ->integerNode('column_index')
                     ->isRequired()
-                    ->cannotBeEmpty()
                 ->end()
             ->end();
 

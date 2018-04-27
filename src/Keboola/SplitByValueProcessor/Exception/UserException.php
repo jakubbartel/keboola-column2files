@@ -1,6 +1,6 @@
 <?php
 
-namespace Keboola\ColumnToFilesProcessor\Exception;
+namespace Keboola\SplitByValueProcessor\Exception;
 
 use Exception;
 

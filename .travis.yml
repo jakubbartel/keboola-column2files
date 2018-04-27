@@ -7,8 +7,8 @@ before_script:
   - docker -v
 
 script:
-  - docker build -t keboola/column2files-processor .
-  - docker run keboola/column2files-processor /bin/bash -c "composer install --no-interaction --no-progress && composer ci"
+  - docker build -t keboola/split-by-value-processor .
+  - docker run keboola/split-by-value-processor /bin/bash -c "composer install --no-interaction --no-progress && composer ci"
 
 after_success:
   - docker images

@@ -9,12 +9,12 @@
     ],
     "autoload": {
         "psr-4": {
-            "Keboola\\ColumnToFilesProcessor\\": "src/Keboola/ColumnToFilesProcessor"
+            "Keboola\\SplitByValueProcessor\\": "src/Keboola/SplitByValueProcessor"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Keboola\\ColumnToFilesProcessor\\Tests\\": "tests/"
+            "Keboola\\SplitByValueProcessor\\Tests\\": "tests/"
         }
     },
     "repositories": [
@@ -26,16 +26,19 @@
     "require": {
         "php": "^7.1",
         "keboola/php-component": "dev-master",
-        "league/uri": "^5.2",
         "league/flysystem": "^1.0",
-        "league/flysystem-memory": "^1.0"
+        "league/flysystem-memory": "^1.0",
+        "symfony/finder": "^4.0",
+        "symfony/filesystem": "^4.0",
+        "keboola/csv": "^1.4"
     },
     "require-dev": {
         "jakub-onderka/php-parallel-lint": "^0.9.2",
         "phpstan/phpstan-shim": "^0.9.2",
         "phpunit/phpunit": "^6.5",
         "slevomat/coding-standard": "~4.0",
-        "squizlabs/php_codesniffer": "~3.2"
+        "squizlabs/php_codesniffer": "~3.2",
+        "mikey179/vfsStream": "^1.6"
     },
     "scripts": {
         "tests": "phpunit",
