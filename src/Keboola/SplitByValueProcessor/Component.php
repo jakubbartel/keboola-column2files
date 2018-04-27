@@ -16,10 +16,10 @@ class Component extends BaseComponent
     }
 
     /**
-     * @param string $columnIndex
+     * @param int $columnIndex
      * @return Processor
      */
-    public function initProcessor(string $columnIndex): Processor
+    public function initProcessor(int $columnIndex): Processor
     {
         return new Processor($columnIndex);
     }

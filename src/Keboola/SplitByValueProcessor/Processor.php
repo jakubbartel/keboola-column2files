@@ -8,7 +8,7 @@ class Processor
 {
 
     /**
-     * @var string
+     * @var int
      */
     private $columnIndex;
 
