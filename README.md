@@ -1,10 +1,22 @@
 # Keboola Split By Value Processor
 
-Split one csv to multiple ones by distinct values in a selected column.
+Split one csv to multiple ones by distinct values in a selected column. Result will be served as a sliced table.
 
 ## Configuration
 
-Example processor configuration - create files by values in the first column (index `0`):
+Example processor configuration - create files by values in column with name `city`:
+```
+{
+    "definition": {
+        "component": "jakub-bartel.processor-split-by-value"
+    }
+    "parameters": {
+        "column_name": "city"
+    }
+}
+```
+
+Alternative example processor configuration - create files by values in the first column (index `0`):
 ```
 {
     "definition": {
