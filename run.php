@@ -2,11 +2,11 @@
 
 require __DIR__ . '/vendor/autoload.php';
 
-use Keboola\ColumnToFilesProcessor\Exception\UserException;
+use Keboola\SplitByValueProcessor\Exception\UserException;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 
 try {
-    $component = new \Keboola\ColumnToFilesProcessor\Component();
+    $component = new \Keboola\SplitByValueProcessor\Component();
     $component->run();
 } catch(UserException | InvalidConfigurationException $e) {
     error_log($e->getMessage());

@@ -87,6 +87,8 @@ class Splitter
     /**
      * @param string $outputDirPath
      * @return Splitter
+     * @throws Csv\Exception
+     * @throws Csv\InvalidArgumentException
      * @throws UserException
      */
     public function split(string $outputDirPath)

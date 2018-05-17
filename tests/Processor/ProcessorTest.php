@@ -11,14 +11,16 @@ class ProcessorTest extends TestCase
 
     public function testProcessOneSheet() : void
     {
-        $columnName = 0;
+        $columnIndex = 0;
 
-        $processor = new SplitByValueProcessor\Processor($columnName);
+        $manifestManager = new \Keboola\Component\Manifest\ManifestManager(__DIR__ . '/fixtures/onefile');
+
+        $processor = new SplitByValueProcessor\Processor(null, $columnIndex, $manifestManager);
 
         $fileSystem = vfsStream::setup();
 
         $processor->processFile(
-            __DIR__ . '/fixtures/onefile/in/input.csv',
+            __DIR__ . '/fixtures/onefile/in/tables/input.csv',
             $fileSystem->url() . '/input.csv'
         );
 
@@ -35,36 +37,38 @@ class ProcessorTest extends TestCase
         );
 
         $this->assertFileEquals(
-            __DIR__ . '/fixtures/onefile/out/input.csv/Berlin',
+            __DIR__ . '/fixtures/onefile/out/tables/input.csv/Berlin',
             $fileSystem->url() . '/input.csv/Berlin'
         );
 
         $this->assertFileEquals(
-            __DIR__ . '/fixtures/onefile/out/input.csv/Bratislava',
+            __DIR__ . '/fixtures/onefile/out/tables/input.csv/Bratislava',
             $fileSystem->url() . '/input.csv/Bratislava'
         );
 
         $this->assertFileEquals(
-            __DIR__ . '/fixtures/onefile/out/input.csv/Budapest',
+            __DIR__ . '/fixtures/onefile/out/tables/input.csv/Budapest',
             $fileSystem->url() . '/input.csv/Budapest'
         );
 
         $this->assertFileEquals(
-            __DIR__ . '/fixtures/onefile/out/input.csv/Prague',
+            __DIR__ . '/fixtures/onefile/out/tables/input.csv/Prague',
             $fileSystem->url() . '/input.csv/Prague'
         );
     }
 
     public function testProcessDirectory() : void
     {
-        $columnName = 0;
+        $columnIndex = 0;
 
-        $processor = new SplitByValueProcessor\Processor($columnName);
+        $manifestManager = new \Keboola\Component\Manifest\ManifestManager(__DIR__ . '/fixtures/directory');
+
+        $processor = new SplitByValueProcessor\Processor(null, $columnIndex, $manifestManager);
 
         $fileSystem = vfsStream::setup();
 
         $processor->processDir(
-            __DIR__ . '/fixtures/directory/in',
+            __DIR__ . '/fixtures/directory/in/tables',
             $fileSystem->url() . '/'
         );
 
@@ -77,28 +81,67 @@ class ProcessorTest extends TestCase
         $this->assertTrue($fileSystem->hasChild('input2.csv/Rome'));
 
         $this->assertFileEquals(
-            __DIR__ . '/fixtures/directory/out/input.csv/Berlin',
+            __DIR__ . '/fixtures/directory/out/tables/input.csv/Berlin',
             $fileSystem->url() . '/input.csv/Berlin'
         );
 
         $this->assertFileEquals(
-            __DIR__ . '/fixtures/directory/out/input.csv/Bratislava',
+            __DIR__ . '/fixtures/directory/out/tables/input.csv/Bratislava',
             $fileSystem->url() . '/input.csv/Bratislava'
         );
 
         $this->assertFileEquals(
-            __DIR__ . '/fixtures/directory/out/input.csv/Budapest',
+            __DIR__ . '/fixtures/directory/out/tables/input.csv/Budapest',
             $fileSystem->url() . '/input.csv/Budapest'
         );
 
         $this->assertFileEquals(
-            __DIR__ . '/fixtures/directory/out/input.csv/Prague',
+            __DIR__ . '/fixtures/directory/out/tables/input.csv/Prague',
             $fileSystem->url() . '/input.csv/Prague'
         );
 
         $this->assertFileEquals(
-            __DIR__ . '/fixtures/directory/out/input2.csv/Rome',
+            __DIR__ . '/fixtures/directory/out/tables/input2.csv/Rome',
             $fileSystem->url() . '/input2.csv/Rome'
+        );
+    }
+
+    public function testProcessManifest() : void
+    {
+        $columnName = "city";
+
+        $manifestManager = new \Keboola\Component\Manifest\ManifestManager(__DIR__ . '/fixtures/manifest');
+
+        $processor = new SplitByValueProcessor\Processor($columnName, null, $manifestManager);
+
+        $fileSystem = vfsStream::setup();
+
+        $processor->processFile(
+            __DIR__ . '/fixtures/manifest/in/tables/input.csv',
+            $fileSystem->url() . '/input.csv'
+        );
+
+        $this->assertFileEquals(
+            __DIR__ . '/fixtures/manifest/out/tables/input.csv.manifest',
+            $fileSystem->url() . '/input.csv.manifest'
+        );
+    }
+
+    public function testProcessMissingColumn() : void
+    {
+        $columnName = "missing_column";
+
+        $manifestManager = new \Keboola\Component\Manifest\ManifestManager(__DIR__ . '/fixtures/missingcolumn');
+
+        $processor = new SplitByValueProcessor\Processor($columnName, null, $manifestManager);
+
+        $fileSystem = vfsStream::setup();
+
+        $this->expectException("\Keboola\SplitByValueProcessor\Exception\UserException");
+
+        $processor->processFile(
+            __DIR__ . '/fixtures/missingcolumn/in/tables/input.csv',
+            $fileSystem->url() . '/input.csv'
         );
     }
 

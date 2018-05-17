@@ -1,0 +1,15 @@
+{
+    "id": "in.c-default.data",
+    "name": "data",
+    "columns": [
+        "city",
+        "date",
+        "precipitation"
+    ],
+    "metadata": [],
+    "column_metadata": {
+        "id": [],
+        "name": [],
+        "text": []
+    }
+}

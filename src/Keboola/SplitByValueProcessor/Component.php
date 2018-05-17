@@ -3,6 +3,7 @@
 namespace Keboola\SplitByValueProcessor;
 
 use Keboola\Component\BaseComponent;
+use Keboola\SplitByValueProcessor\Exception\UserException;
 
 class Component extends BaseComponent
 {
@@ -16,20 +17,28 @@ class Component extends BaseComponent
     }
 
     /**
-     * @param int $columnIndex
      * @return Processor
+     * @throws UserException
      */
-    public function initProcessor(int $columnIndex): Processor
+    public function initProcessor(): Processor
     {
-        return new Processor($columnIndex);
+        $columnName = $this->getConfig()->getValue(['parameters', 'column_name'], false);
+        $columnIndex = $this->getConfig()->getValue(['parameters', 'column_index'], false);
+
+        return new Processor(
+            $columnName === false ? null : $columnName,
+            $columnIndex === false ? null : $columnIndex,
+            $this->getManifestManager()
+        );
     }
 
     /**
-     *
+     * @throws Exception\UserException
      */
     public function run() : void
     {
-        $processor = $this->initProcessor($this->getConfig()->getValue(['parameters', 'column_index']));
+        $processor = $this->initProcessor();
+
         $processor->processDir(
             sprintf('%s%s', $this->getDataDir(), '/in/tables'),
             sprintf('%s%s', $this->getDataDir(), '/out/tables')

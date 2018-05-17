@@ -20,7 +20,8 @@ class ConfigDefinition extends BaseConfigDefinition
             ->isRequired()
             ->children()
                 ->integerNode('column_index')
-                    ->isRequired()
+                ->end()
+                ->scalarNode('column_name')
                 ->end()
             ->end();
 
