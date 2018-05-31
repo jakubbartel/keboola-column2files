@@ -105,9 +105,13 @@ class Processor
         $finder = new Finder();
         $finder->directories()->in($inFilesDirPath)->depth(0)->notName("*.manifest");
 
+        $finder->sort(function ($a, $b) { return strcmp($a->getFilename(), $b->getFilename()); });
+
         foreach($finder as $file) {
             $sliceFinder = new Finder();
             $sliceFinder->in($file->getPathname())->files();
+
+            $sliceFinder->sort(function ($a, $b) { return strcmp($a->getFilename(), $b->getFilename()); });
 
             foreach($sliceFinder as $sliceFile) {
                 $outputPath = sprintf('%s/%s',
