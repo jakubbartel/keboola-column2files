@@ -9,7 +9,7 @@ use PHPUnit\Framework\TestCase;
 class ProcessorTest extends TestCase
 {
 
-    public function testProcessOneSheet() : void
+    public function testProcessOneFile() : void
     {
         $columnIndex = 0;
 
@@ -21,7 +21,8 @@ class ProcessorTest extends TestCase
 
         $processor->processFile(
             __DIR__ . '/fixtures/onefile/in/tables/input.csv',
-            $fileSystem->url() . '/input.csv'
+            $fileSystem->url() . '/input.csv',
+            true
         );
 
         $this->assertEquals(
@@ -57,6 +58,161 @@ class ProcessorTest extends TestCase
         );
     }
 
+    public function testProcessOneFileDirectory() : void
+    {
+        $columnIndex = 0;
+
+        $manifestManager = new \Keboola\Component\Manifest\ManifestManager(__DIR__ . '/fixtures/onefile');
+
+        $processor = new SplitByValueProcessor\Processor(null, $columnIndex, $manifestManager);
+
+        $fileSystem = vfsStream::setup();
+
+        $processor->processDir(
+            __DIR__ . '/fixtures/onefile/in/tables',
+            $fileSystem->url()
+        );
+
+        $this->assertEquals(
+            scandir($fileSystem->url() . '/'),
+            [
+                '.',
+                '..',
+                'input.csv',
+                'input.csv.manifest',
+            ]
+        );
+
+        $this->assertEquals(
+            scandir($fileSystem->url() . '/input.csv'),
+            [
+                '.',
+                '..',
+                'Berlin',
+                'Bratislava',
+                'Budapest',
+                'Prague',
+            ]
+        );
+
+        $this->assertFileEquals(
+            __DIR__ . '/fixtures/onefile/out/tables/input.csv/Berlin',
+            $fileSystem->url() . '/input.csv/Berlin'
+        );
+
+        $this->assertFileEquals(
+            __DIR__ . '/fixtures/onefile/out/tables/input.csv/Bratislava',
+            $fileSystem->url() . '/input.csv/Bratislava'
+        );
+
+        $this->assertFileEquals(
+            __DIR__ . '/fixtures/onefile/out/tables/input.csv/Budapest',
+            $fileSystem->url() . '/input.csv/Budapest'
+        );
+
+        $this->assertFileEquals(
+            __DIR__ . '/fixtures/onefile/out/tables/input.csv/Prague',
+            $fileSystem->url() . '/input.csv/Prague'
+        );
+    }
+
+    public function testProcessFileWithHeader() : void
+    {
+        $columnIndex = 0;
+
+        $manifestManager = new \Keboola\Component\Manifest\ManifestManager(__DIR__ . '/fixtures/onefile');
+
+        $processor = new SplitByValueProcessor\Processor(null, $columnIndex, $manifestManager);
+
+        $fileSystem = vfsStream::setup();
+
+        $processor->processFile(
+            __DIR__ . '/fixtures/filewithheader/in/tables/input.csv',
+            $fileSystem->url() . '/input.csv'
+        );
+
+        $this->assertEquals(
+            scandir($fileSystem->url() . '/input.csv'),
+            [
+                '.',
+                '..',
+                'Berlin',
+                'Bratislava',
+                'Budapest',
+                'Prague',
+                'city',
+            ]
+        );
+
+        $this->assertFileEquals(
+            __DIR__ . '/fixtures/filewithheader/out/tables/input.csv/Berlin',
+            $fileSystem->url() . '/input.csv/Berlin'
+        );
+
+        $this->assertFileEquals(
+            __DIR__ . '/fixtures/filewithheader/out/tables/input.csv/Bratislava',
+            $fileSystem->url() . '/input.csv/Bratislava'
+        );
+
+        $this->assertFileEquals(
+            __DIR__ . '/fixtures/filewithheader/out/tables/input.csv/Budapest',
+            $fileSystem->url() . '/input.csv/Budapest'
+        );
+
+        $this->assertFileEquals(
+            __DIR__ . '/fixtures/filewithheader/out/tables/input.csv/Prague',
+            $fileSystem->url() . '/input.csv/Prague'
+        );
+    }
+
+    public function testProcessSlicedFile() : void
+    {
+        $columnIndex = 0;
+
+        $manifestManager = new \Keboola\Component\Manifest\ManifestManager(__DIR__ . '/fixtures/slicedfile');
+
+        $processor = new SplitByValueProcessor\Processor(null, $columnIndex, $manifestManager);
+
+        $fileSystem = vfsStream::setup();
+
+        $processor->processDir(
+            __DIR__ . '/fixtures/slicedfile/in/tables',
+            $fileSystem->url()
+        );
+
+        $this->assertEquals(
+            scandir($fileSystem->url() . '/input.csv'),
+            [
+                '.',
+                '..',
+                'Berlin',
+                'Bratislava',
+                'Budapest',
+                'Prague',
+            ]
+        );
+
+        $this->assertFileEquals(
+            __DIR__ . '/fixtures/slicedfile/out/tables/input.csv/Berlin',
+            $fileSystem->url() . '/input.csv/Berlin'
+        );
+
+        $this->assertFileEquals(
+            __DIR__ . '/fixtures/slicedfile/out/tables/input.csv/Bratislava',
+            $fileSystem->url() . '/input.csv/Bratislava'
+        );
+
+        $this->assertFileEquals(
+            __DIR__ . '/fixtures/slicedfile/out/tables/input.csv/Budapest',
+            $fileSystem->url() . '/input.csv/Budapest'
+        );
+
+        $this->assertFileEquals(
+            __DIR__ . '/fixtures/slicedfile/out/tables/input.csv/Prague',
+            $fileSystem->url() . '/input.csv/Prague'
+        );
+    }
+
     public function testProcessDirectory() : void
     {
         $columnIndex = 0;
@@ -70,6 +226,39 @@ class ProcessorTest extends TestCase
         $processor->processDir(
             __DIR__ . '/fixtures/directory/in/tables',
             $fileSystem->url() . '/'
+        );
+
+        $this->assertEquals(
+            [
+                '.',
+                '..',
+                'input.csv',
+                'input.csv.manifest',
+                'input2.csv',
+                'input2.csv.manifest',
+            ],
+            scandir($fileSystem->url() . '/')
+        );
+
+        $this->assertEquals(
+            [
+                '.',
+                '..',
+                'Berlin',
+                'Bratislava',
+                'Budapest',
+                'Prague',
+            ],
+            scandir($fileSystem->url() . '/input.csv')
+        );
+
+        $this->assertEquals(
+            [
+                '.',
+                '..',
+                'Rome',
+            ],
+            scandir($fileSystem->url() . '/input2.csv')
         );
 
         $this->assertTrue($fileSystem->hasChild('input.csv'));

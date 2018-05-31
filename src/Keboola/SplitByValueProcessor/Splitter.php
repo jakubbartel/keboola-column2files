@@ -4,6 +4,7 @@ namespace Keboola\SplitByValueProcessor;
 
 use Keboola\Component\Manifest\ManifestManager;
 use Keboola\Csv;
+use Keboola\SplitByValueProcessor\Exception\SplitterException;
 use Keboola\SplitByValueProcessor\Exception\UserException;
 
 class Splitter
@@ -12,38 +13,42 @@ class Splitter
     /**
      * @var string
      */
-    protected $filePath;
+    private $filePath;
 
     /**
      * @var int
      */
-    protected $columnIndex;
+    private $columnIndex;
+
+    /**
+     * @var bool
+     */
+    private $skipHeader;
+
+    /**
+     * @var SplitterFiles
+     */
+    private $splitterFiles;
 
     /**
      * Splitter constructor.
      *
      * @param string $filePath
      * @param int $columnIndex
+     * @param bool $skipHeader
+     * @param SplitterFiles $splitterFiles
      * @throws UserException
      */
-    public function __construct(string $filePath, int $columnIndex)
+    public function __construct(string $filePath, int $columnIndex, bool $skipHeader, SplitterFiles $splitterFiles)
     {
         if($columnIndex < 0) {
             throw new UserException('Column index cannot be negative.');
         }
 
         $this->columnIndex = $columnIndex;
+        $this->skipHeader = $skipHeader;
         $this->filePath = $filePath;
-    }
-
-    /**
-     * @param string $outputDirPath
-     * @param string $value
-     * @return string
-     */
-    private function getOutputFileName(string $outputDirPath, string $value)
-    {
-        return sprintf("%s/%s", $outputDirPath, $value);
+        $this->splitterFiles = $splitterFiles;
     }
 
     /**
@@ -53,20 +58,6 @@ class Splitter
     private function getOutputManifestName(string $outputFilePath)
     {
         return ManifestManager::getManifestFilename($outputFilePath);
-    }
-
-    /**
-     * @param string $outputDirPath
-     * @param string $value
-     * @return string
-     */
-    private function createOutputFile(string $outputDirPath, string $value)
-    {
-        $outputFilePath = $this->getOutputFileName($outputDirPath, $value);
-
-        touch($outputFilePath);
-
-        return $outputFilePath;
     }
 
     /**
@@ -87,18 +78,22 @@ class Splitter
     /**
      * @param string $outputDirPath
      * @return Splitter
-     * @throws Csv\Exception
-     * @throws Csv\InvalidArgumentException
      * @throws UserException
+     * @throws Exception\SplitterException
      */
     public function split(string $outputDirPath)
     {
-        $csvFile = new Csv\CsvFile($this->filePath);
-
-        /**
-         * @var Csv\CsvFile[] $outFiles column's values => output files
-         */
-        $outFiles = [];
+        try {
+            $csvFile = new Csv\CsvFile(
+                $this->filePath,
+                Csv\CsvFile::DEFAULT_DELIMITER,
+                Csv\CsvFile::DEFAULT_ENCLOSURE,
+                Csv\CsvFile::DEFAULT_ESCAPED_BY,
+                $this->skipHeader ? 1 : 0
+            );
+        } catch(Csv\InvalidArgumentException $e) {
+            throw new SplitterException("Cannot open input file");
+        }
 
         $c_i = $this->columnIndex;
 
@@ -109,13 +104,13 @@ class Splitter
 
             $value = $row[$c_i];
 
-            if(! isset($outFiles[$value])) {
-                $outputFilePath = $this->createOutputFile($outputDirPath, $value);
+            $file = $this->splitterFiles->getFile($outputDirPath, $value);
 
-                $outFiles[$value] = new Csv\CsvFile($outputFilePath);
+            try {
+                $file->writeRow($row);
+            } catch(Csv\Exception $e) {
+                throw new SplitterException("Cannot write to output file");
             }
-
-            $outFiles[$value]->writeRow($row);
         }
 
         $this->createOutputManifest($outputDirPath);

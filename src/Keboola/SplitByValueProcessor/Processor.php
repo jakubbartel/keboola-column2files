@@ -25,6 +25,11 @@ class Processor
     private $manifestManager;
 
     /**
+     * @var SplitterFiles
+     */
+    private $splitterFiles;
+
+    /**
      * Processor constructor.
      *
      * @param string $columnName
@@ -42,6 +47,8 @@ class Processor
         $this->columnIndex = $columnIndex;
 
         $this->manifestManager = $manifestManager;
+
+        $this->splitterFiles = new SplitterFiles();
     }
 
     /**
@@ -56,7 +63,7 @@ class Processor
         $inOuts = [];
 
         $finder = new Finder();
-        $finder->files()->in($inFilesDirPath);
+        $finder->files()->in($inFilesDirPath)->depth(0);
 
         $finder->files()->notName("*.manifest");
 
@@ -79,6 +86,40 @@ class Processor
                 'input' => $file->getPathname(),
                 'output' => $outFilePath
             ];
+        }
+
+        return $inOuts;
+    }
+
+    /**
+     * Look up all directories that are not manifests.
+     *
+     * @param string $inFilesDirPath
+     * @param string $outFilesDirPath
+     * @return array
+     */
+    private function getSlicedFilesToProcess(string $inFilesDirPath, string $outFilesDirPath): array
+    {
+        $inOuts = [];
+
+        $finder = new Finder();
+        $finder->directories()->in($inFilesDirPath)->depth(0)->notName("*.manifest");
+
+        foreach($finder as $file) {
+            $sliceFinder = new Finder();
+            $sliceFinder->in($file->getPathname())->files();
+
+            foreach($sliceFinder as $sliceFile) {
+                $outputPath = sprintf('%s/%s',
+                    $outFilesDirPath,
+                    $file->getFilename()
+                );
+
+                $inOuts[] = [
+                    'input' => $sliceFile->getPathname(),
+                    'output' => $outputPath
+                ];
+            }
         }
 
         return $inOuts;
@@ -157,16 +198,16 @@ class Processor
     /**
      * @param string $inFilePath
      * @param string $outPath
+     * @param bool $skipHeader
      * @return Processor
+     * @throws Exception\SplitterException
      * @throws UserException
-     * @throws \Keboola\Csv\Exception
-     * @throws \Keboola\Csv\InvalidArgumentException
      */
-    public function processFile(string $inFilePath, string $outPath): self
+    public function processFile(string $inFilePath, string $outPath, bool $skipHeader=false): self
     {
         $fileColumnIndex = $this->getFileColumnIndex($inFilePath);
 
-        $splitter = new Splitter($inFilePath, $fileColumnIndex);
+        $splitter = new Splitter($inFilePath, $fileColumnIndex, $skipHeader, $this->splitterFiles);
 
         if(!file_exists($outPath)) {
             mkdir($outPath, 0777, true);
@@ -184,15 +225,20 @@ class Processor
      * @param string $outFilesDirPath
      * @return Processor
      * @throws UserException
-     * @throws \Keboola\Csv\Exception
-     * @throws \Keboola\Csv\InvalidArgumentException
+     * @throws Exception\SplitterException
      */
     public function processDir(string $inFilesDirPath, string $outFilesDirPath): self
     {
         $inOuts = $this->getFilesToProcess($inFilesDirPath, $outFilesDirPath);
 
         foreach($inOuts as $inOut) {
-            $this->processFile($inOut['input'], $inOut['output']);
+            $this->processFile($inOut['input'], $inOut['output'], true);
+        }
+
+        $inOuts = $this->getSlicedFilesToProcess($inFilesDirPath, $outFilesDirPath);
+
+        foreach($inOuts as $inOut) {
+            $this->processFile($inOut['input'], $inOut['output'], false);
         }
 
         return $this;
