@@ -9,7 +9,7 @@ Example processor configuration - create files by values in column with name `ci
 {
     "definition": {
         "component": "jakub-bartel.processor-split-by-value"
-    }
+    },
     "parameters": {
         "column_name": "city"
     }
@@ -21,7 +21,7 @@ Alternative example processor configuration - create files by values in the firs
 {
     "definition": {
         "component": "jakub-bartel.processor-split-by-value"
-    }
+    },
     "parameters": {
         "column_index": 0
     }
