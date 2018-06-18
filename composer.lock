@@ -1,23 +1,23 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "aac6925f9d2a9748057b4593435fc7a7",
+    "content-hash": "29721d3aad4d99508bc74d0ece8dbda3",
     "packages": [
         {
             "name": "keboola/csv",
-            "version": "1.4.0",
+            "version": "2.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/keboola/php-csv.git",
-                "reference": "2489d9e3d9aa530275ce17bc5abd2c19e775c259"
+                "reference": "d46e83e973aeec11dbebe55deb6eb9c0f14cd271"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/keboola/php-csv/zipball/2489d9e3d9aa530275ce17bc5abd2c19e775c259",
-                "reference": "2489d9e3d9aa530275ce17bc5abd2c19e775c259",
+                "url": "https://api.github.com/repos/keboola/php-csv/zipball/d46e83e973aeec11dbebe55deb6eb9c0f14cd271",
+                "reference": "d46e83e973aeec11dbebe55deb6eb9c0f14cd271",
                 "shasum": ""
             },
             "require": {
@@ -50,7 +50,7 @@
                 "csv",
                 "rfc4180"
             ],
-            "time": "2018-04-13T06:28:06+00:00"
+            "time": "2018-05-18T09:12:21+00:00"
         },
         {
             "name": "keboola/php-component",
