@@ -8,6 +8,7 @@ before_script:
 
 script:
   - docker build -t keboola/split-by-value-processor .
+  - docker run keboola/split-by-value-processor /bin/bash -c "composer install --no-interaction --no-progress && composer ci"
 
 after_success:
   - docker images
