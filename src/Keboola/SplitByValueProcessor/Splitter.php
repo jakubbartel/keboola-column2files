@@ -16,6 +16,11 @@ class Splitter
     private $filePath;
 
     /**
+     * @var string
+     */
+    private $sortedFilePath;
+
+    /**
      * @var int
      */
     private $columnIndex;
@@ -48,7 +53,36 @@ class Splitter
         $this->columnIndex = $columnIndex;
         $this->skipHeader = $skipHeader;
         $this->filePath = $filePath;
+        $this->sortedFilePath = sprintf("%s%s", $filePath, 'sorted');
         $this->splitterFiles = $splitterFiles;
+
+        $this->sortFile();
+    }
+
+    private function sortFile(): self
+    {
+        $t = microtime(true);
+
+        $cmd = "sort --buffer-size=1000m --field-separator=\",\" --parallel=2 --key=%d --output=%s %s";
+
+        $field = $this->columnIndex + 1;
+        $inputFile = $this->filePath;
+        $outputFile = $this->sortedFilePath;
+
+        $output = '';
+        $code = 0;
+
+        exec(
+            sprintf($cmd, $field, $outputFile, $inputFile),
+            $output,
+            $code
+        );
+
+        $this->skipHeader = false;
+
+        echo sprintf("File sorted in %.3f", microtime(true) - $t);
+
+        return $this;
     }
 
     /**
@@ -85,7 +119,7 @@ class Splitter
     {
         try {
             $csvFile = new Csv\CsvReader(
-                $this->filePath,
+                $this->sortedFilePath,
                 Csv\CsvReader::DEFAULT_DELIMITER,
                 Csv\CsvReader::DEFAULT_ENCLOSURE,
                 Csv\CsvReader::DEFAULT_ESCAPED_BY,
