@@ -84,14 +84,14 @@ class Splitter
     public function split(string $outputDirPath)
     {
         try {
-            $csvFile = new Csv\CsvFile(
+            $csvFile = new Csv\CsvReader(
                 $this->filePath,
-                Csv\CsvFile::DEFAULT_DELIMITER,
-                Csv\CsvFile::DEFAULT_ENCLOSURE,
-                Csv\CsvFile::DEFAULT_ESCAPED_BY,
+                Csv\CsvReader::DEFAULT_DELIMITER,
+                Csv\CsvReader::DEFAULT_ENCLOSURE,
+                Csv\CsvReader::DEFAULT_ESCAPED_BY,
                 $this->skipHeader ? 1 : 0
             );
-        } catch(Csv\InvalidArgumentException $e) {
+        } catch(Csv\Exception $e) {
             throw new SplitterException("Cannot open input file");
         }
 

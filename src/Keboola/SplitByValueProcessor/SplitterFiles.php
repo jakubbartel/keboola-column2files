@@ -11,7 +11,7 @@ class SplitterFiles
     private const BUFFER_SIZE = 999;
 
     /**
-     * @var Csv\CsvFile[]
+     * @var Csv\CsvWriter[]
      */
     private $files;
 
@@ -32,10 +32,10 @@ class SplitterFiles
     /**
      * @param string $outputDirPath
      * @param string $value
-     * @return Csv\CsvFile
+     * @return Csv\CsvWriter
      * @throws SplitterException
      */
-    public function getFile(string $outputDirPath, string $value): Csv\CsvFile
+    public function getFile(string $outputDirPath, string $value): Csv\CsvWriter
     {
         return $this->getBufferedFile($outputDirPath, $value);
     }
@@ -43,22 +43,15 @@ class SplitterFiles
     /**
      * @param string $outputDirPath
      * @param string $value
-     * @return Csv\CsvFile
+     * @return Csv\CsvWriter
      * @throws SplitterException
      */
-    private function getBufferedFile(string $outputDirPath, string $value): Csv\CsvFile
+    private function getBufferedFile(string $outputDirPath, string $value): Csv\CsvWriter
     {
         if(!isset($this->files[$value])) {
             $this->addFileToBuffer($value);
 
-            $outputFilePath = $this->createOutputFile($outputDirPath, $value);
-
-            try {
-                // @todo load delimiter, encl., esc. from input manifest
-                $this->files[$value] = new Csv\CsvFile($outputFilePath);
-            } catch(Csv\InvalidArgumentException $e) {
-                throw new SplitterException('Cannot create new file');
-            }
+            $this->createOutputFile($outputDirPath, $value);
         }
 
         return $this->files[$value];
@@ -94,17 +87,26 @@ class SplitterFiles
     /**
      * @param string $outputDirPath
      * @param string $value
-     * @return string
+     * @return SplitterFiles
+     * @throws SplitterException
      */
-    private function createOutputFile(string $outputDirPath, string $value): string
+    private function createOutputFile(string $outputDirPath, string $value): self
     {
         $outputFilePath = $this->getOutputFileName($outputDirPath, $value);
 
-        if(!file_exists($outputFilePath)) {
-            touch($outputFilePath);
+        $file = fopen($outputFilePath, 'a');
+        if($file === false) {
+            throw new SplitterException('Cannot create new file');
         }
 
-        return $outputFilePath;
+        try {
+            // @todo load delimiter, encl., esc. from input manifest
+            $this->files[$value] = new Csv\CsvWriter($file);
+        } catch(Csv\Exception $e) {
+            throw new SplitterException('Cannot write to file');
+        }
+
+        return $this;
     }
 
 }
