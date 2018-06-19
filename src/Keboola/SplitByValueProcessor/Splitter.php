@@ -133,7 +133,8 @@ class Splitter
 
         foreach($csvFile as $row) {
             if($c_i >= count($row)) {
-                throw new UserException(sprintf("Index %d out of bounds of table's %d columns", $c_i, count($row)));
+                // throw new UserException(sprintf("Index %d out of bounds of table's %d columns", $c_i, count($row)));
+                echo sprintf('skipping row with %d columns', count($row)) . "\n";
             }
 
             $value = $row[$c_i];
