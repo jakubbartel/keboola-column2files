@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-const MaxWriters = 2000
+const MaxWriters = 1000
 
 type buffer struct {
 	values   map[string]*bufferValue
