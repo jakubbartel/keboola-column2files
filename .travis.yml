@@ -1,0 +1,21 @@
+sudo: required
+language: bash
+services:
+  - docker
+
+before_script:
+  - docker -v
+
+script:
+  - docker build -t keboola/split-by-value-processor .
+  - docker run keboola/split-by-value-processor go test . ./fastcsv
+
+after_success:
+  - docker images
+
+deploy:
+  provider: script
+  skip_cleanup: true
+  script: ./deploy.sh
+  on:
+    tags: true
