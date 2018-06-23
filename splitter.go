@@ -2,8 +2,8 @@ package main
 
 import (
 	"bufio"
-	"fmt"
 	"github.com/jakubbartel/keboola-split-by-value-processor/fastcsv"
+	"log"
 	"os"
 	"time"
 )
@@ -38,7 +38,7 @@ func (b *buffer) getWriter(field []byte, outputPath string) (w *bufio.Writer) {
 
 	f, err := os.OpenFile(outputPath, os.O_CREATE|os.O_WRONLY, 0600)
 	if err != nil {
-		panic("cannot create file")
+		log.Fatalf("cannot create file \"%s\", err: %s", outputPath, err)
 	}
 
 	w = bufio.NewWriterSize(f, 16384)
@@ -76,7 +76,7 @@ func (b *buffer) close() {
 func split(filePath string, outputDir string, skipHeader bool) {
 	f, err := os.Open(filePath)
 	if err != nil {
-		panic("cannot open file")
+		log.Fatalf("cannot open file \"%s\", err: %s", filePath, err)
 	}
 
 	b := buffer{
@@ -88,9 +88,9 @@ func split(filePath string, outputDir string, skipHeader bool) {
 
 		ret, err := f.Seek(0, 0)
 		if err != nil {
-			panic("cannot seek")
+			log.Fatalf("cannot on input file, err: %s", err)
 		} else if ret != 0 {
-			panic("not seek to 0")
+			log.Fatalf("cannot seek to 0 on input file")
 		}
 
 		r := fastcsv.NewReader(f)
@@ -112,14 +112,14 @@ func split(filePath string, outputDir string, skipHeader bool) {
 			w.Write(r.Row())
 		}
 		if err := r.Err(); err != nil {
-			panic(err)
+			log.Fatalf("error while reading csv, err: %s", err)
 		}
 
 		toBreak := b.rejected == 0
 
 		b.close()
 
-		fmt.Println("one pass took", time.Since(t))
+		log.Printf("one pass took %s", time.Since(t))
 
 		if toBreak {
 			break

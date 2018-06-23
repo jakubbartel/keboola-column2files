@@ -20,7 +20,7 @@ func (b *bufferedReader) more() error {
 		copy(tempRaw, b.rawData)
 
 		b.data = temp
-		b.rawData= tempRaw
+		b.rawData = tempRaw
 	}
 
 	// read the new bytes onto the end of the buffer
@@ -279,8 +279,8 @@ func NewReader(r io.Reader) Reader {
 	return Reader{
 		fields: fields{
 			buffer: bufferedReader{
-				r: r,
-				data: make([]byte, 0, 1024),
+				r:       r,
+				data:    make([]byte, 0, 1024),
 				rawData: make([]byte, 0, 1024),
 			},
 		},

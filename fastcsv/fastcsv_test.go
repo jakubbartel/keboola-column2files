@@ -1,9 +1,9 @@
 package fastcsv
 
 import (
-	"testing"
-	"reflect"
 	"bytes"
+	"reflect"
+	"testing"
 )
 
 func TestSimpleRows(t *testing.T) {

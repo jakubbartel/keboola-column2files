@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
-	"time"
-	"os"
 	"io"
+	"os"
+	"time"
 )
 
 func main() {
@@ -15,12 +15,12 @@ func main() {
 		dataPath = "/data/"
 	}
 
-	filePath := dataPath + "in/tables/NaklStatistikyAllShops.csv.head8"
+	filePath := dataPath + "in/tables/NaklStatistikyAllShops.csv"
 	outputDir := dataPath + "out/tables/NaklStatistikyAllShops.csv"
 
 	Copy(
-		dataPath + "in/tables/NaklStatistikyAllShops.csv.manifest",
-		dataPath + "out/tables/NaklStatistikyAllShops.csv.manifest",
+		dataPath+"in/tables/NaklStatistikyAllShops.csv.manifest",
+		dataPath+"out/tables/NaklStatistikyAllShops.csv.manifest",
 	)
 
 	os.Mkdir(outputDir, 0755)
@@ -31,7 +31,7 @@ func main() {
 }
 
 // Copies a file.
-func Copy (src string, dst string) error {
+func Copy(src string, dst string) error {
 	// Open the source file for reading
 	s, err := os.Open(src)
 	if err != nil {
@@ -46,7 +46,7 @@ func Copy (src string, dst string) error {
 	}
 
 	// Copy the contents of the source file into the destination file
-	if _,err := io.Copy(d,s); err != nil {
+	if _, err := io.Copy(d, s); err != nil {
 		d.Close()
 		return err
 	}
