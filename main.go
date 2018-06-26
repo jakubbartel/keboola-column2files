@@ -1,9 +1,11 @@
 package main
 
 import (
-	"fmt"
 	"io"
+	"io/ioutil"
+	"log"
 	"os"
+	"regexp"
 	"time"
 )
 
@@ -15,19 +17,36 @@ func main() {
 		dataPath = "/data/"
 	}
 
-	filePath := dataPath + "in/tables/NaklStatistikyAllShops.csv"
-	outputDir := dataPath + "out/tables/NaklStatistikyAllShops.csv"
+	inDir := dataPath + "in/tables/"
+	outDir := dataPath + "out/tables/"
 
-	Copy(
-		dataPath+"in/tables/NaklStatistikyAllShops.csv.manifest",
-		dataPath+"out/tables/NaklStatistikyAllShops.csv.manifest",
-	)
+	files, err := ioutil.ReadDir(inDir)
+	if err != nil {
+		log.Fatalf("Cannot read directory, err: %s", err)
+	}
 
-	os.Mkdir(outputDir, 0755)
+	rgxManifest := regexp.MustCompile(`.*\.manifest`)
 
-	t = time.Now()
-	split(filePath, outputDir, true)
-	fmt.Println("split took", time.Since(t))
+	for _, file := range files {
+		// just copy all manifests
+		if rgxManifest.MatchString(file.Name()) {
+			Copy(inDir+"/"+file.Name(), outDir+"/"+file.Name())
+			continue
+		}
+
+		// @todo add support for sliced tables - simply iterate in this subdirectory
+		if file.IsDir() {
+			continue
+		}
+
+		os.Mkdir(outDir+"/"+file.Name(), 0755)
+
+		t = time.Now()
+
+		split(inDir+"/"+file.Name(), outDir+"/"+file.Name(), true)
+
+		log.Printf("file %s split took %s", file.Name(), time.Since(t))
+	}
 }
 
 // Copies a file.
