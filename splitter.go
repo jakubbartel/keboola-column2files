@@ -102,7 +102,7 @@ func split(filePath string, outputDir string, columnIndex int, skipHeader bool) 
 		for r.Next() {
 			fields := r.Fields()
 
-			outputPath := outputDir + "/" + string(fields[1])
+			outputPath := outputDir + "/" + string(fields[columnIndex])
 
 			w := b.getWriter(fields[columnIndex], outputPath)
 			if w == nil {
