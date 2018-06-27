@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"io"
 	"io/ioutil"
 	"log"
@@ -9,12 +10,35 @@ import (
 	"time"
 )
 
+type Manifest struct {
+	Columns []string `json:"columns"`
+}
+
+type Config struct {
+	Parameters ConfigParameters `json:"parameters"`
+}
+
+type ConfigParameters struct {
+	ColumnName string `json:"column_name"`
+}
+
 func main() {
 	var t time.Time
 
 	dataPath, ok := os.LookupEnv("KBC_DATADIR")
 	if !ok {
 		dataPath = "/data/"
+	}
+
+	cb, err := ioutil.ReadFile(dataPath + "/config.json")
+	if err != nil {
+		log.Fatalf("cannot read config, error: %s", err)
+	}
+
+	conf := Config{}
+	err = json.Unmarshal(cb, &conf)
+	if err != nil {
+		log.Fatalf("cannot parse config, error: %s", err)
 	}
 
 	inDir := dataPath + "in/tables/"
@@ -34,6 +58,38 @@ func main() {
 			continue
 		}
 
+		if _, err := os.Stat(inDir + "/" + file.Name() + ".manifest"); os.IsNotExist(err) {
+			log.Printf("skipping file %s without manifest", file.Name())
+			continue
+		}
+
+		mb, err := ioutil.ReadFile(inDir + "/" + file.Name() + ".manifest")
+		if err != nil {
+			log.Printf("cannot read files %s manifest, skipping", file.Name())
+			continue
+		}
+
+		m := Manifest{}
+		err = json.Unmarshal(mb, &m)
+		if err != nil {
+			log.Printf("cannot parse columns from files %s manifest, skipping", file.Name())
+			continue
+		}
+
+		columnIndex := -1
+
+		for i, col := range m.Columns {
+			if col == conf.Parameters.ColumnName {
+				columnIndex = i
+				break
+			}
+		}
+
+		if columnIndex == -1 {
+			log.Printf("cannot find column %s in manifest, skipping", conf.Parameters.ColumnName)
+			continue
+		}
+
 		// @todo add support for sliced tables - simply iterate in this subdirectory
 		if file.IsDir() {
 			continue
@@ -43,7 +99,7 @@ func main() {
 
 		t = time.Now()
 
-		split(inDir+"/"+file.Name(), outDir+"/"+file.Name(), true)
+		split(inDir+"/"+file.Name(), outDir+"/"+file.Name(), columnIndex, true)
 
 		log.Printf("file %s split took %s", file.Name(), time.Since(t))
 	}

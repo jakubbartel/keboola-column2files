@@ -73,7 +73,7 @@ func (b *buffer) close() {
 	b.rejected = 0
 }
 
-func split(filePath string, outputDir string, skipHeader bool) {
+func split(filePath string, outputDir string, columnIndex int, skipHeader bool) {
 	f, err := os.Open(filePath)
 	if err != nil {
 		log.Fatalf("cannot open file \"%s\", err: %s", filePath, err)
