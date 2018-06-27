@@ -41,8 +41,8 @@ func main() {
 		log.Fatalf("cannot parse config, error: %s", err)
 	}
 
-	inDir := dataPath + "in/tables/"
-	outDir := dataPath + "out/tables/"
+	inDir := dataPath + "in/tables"
+	outDir := dataPath + "out/tables"
 
 	files, err := ioutil.ReadDir(inDir)
 	if err != nil {
@@ -88,6 +88,8 @@ func main() {
 		if columnIndex == -1 {
 			log.Printf("cannot find column %s in manifest, skipping", conf.Parameters.ColumnName)
 			continue
+		} else {
+			log.Printf("splitting by column index %d", columnIndex)
 		}
 
 		// @todo add support for sliced tables - simply iterate in this subdirectory
